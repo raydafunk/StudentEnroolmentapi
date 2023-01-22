@@ -1,4 +1,4 @@
-﻿namespace StudentEnrollment.data
+﻿namespace StudentEnrollment.data.Models
 {
     public abstract class BaseEnitiy
     {
