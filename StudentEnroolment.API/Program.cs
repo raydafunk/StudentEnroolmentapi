@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using StudentEnrollment.data;
 using StudentEnrollment.data.Models;
+using StudentEnroolment.API.EndPoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,36 +34,10 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 
-app.MapGet("/courses", async (StudentEnorllmentDbContext context) =>
-{
-    return await context.Courses.ToListAsync();
-});
+app.MapStudentEndpoints();
 
-app.MapGet("/courses/{id}", async (StudentEnorllmentDbContext context, int id) => {
-   return await context.Courses.FindAsync(id) is Course course ? Results.Ok(course) : Results.NotFound();
-});
+app.MapEnrollmentEndpoints();
 
-app.MapPost("/courses", async (StudentEnorllmentDbContext context, Course course) => {
-     await context.AddAsync(course);
-     await context.SaveChangesAsync();
-     return Results.Created($"/courses/{course.Id}", course);
-});
-
-app.MapPut("/courses/{id}", async (StudentEnorllmentDbContext context, Course course, int id) => {
-    var recordExists =  await context.Courses.AnyAsync(q => q.Id == course.Id);
-    if(!recordExists) return Results.NotFound();
-
-    context.Update(course);
-    await context.SaveChangesAsync();
-    return Results.NoContent();
-});
-app.MapDelete("/courses/{id}", async (StudentEnorllmentDbContext context, int id) => {
-    var record = await context.Courses.FindAsync(id);
-    if(record == null) return Results.NotFound();
-
-    context.Remove(record);
-    await context.SaveChangesAsync();
-    return Results.NoContent() ;
-});
+app.MapCourseEndpoints();
 
 app.Run();
