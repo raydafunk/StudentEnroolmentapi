@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.OpenApi;
 using StudentEnrollment.data;
 using StudentEnrollment.data.Models;
+using StudentEnroolment.API.Dtos.CourseDto;
 
 namespace StudentEnroolment.API.EndPoints;
 
@@ -14,10 +15,22 @@ public static class CourseEndpoints
 
         group.MapGet("/", async (StudentEnorllmentDbContext db) =>
         {
-            return await db.Courses.ToListAsync();
+            var data = new List<CourseDto>();
+            var courses = await db.Courses.ToListAsync();
+            foreach (var course in courses)
+            {
+                data.Add(new CourseDto
+                {
+                    Title = course.Title,
+                    Credits = course.Credits,
+                    Id = course.Id,
+                });
+            }
+            return data;
         })
         .WithName("GetAllCourses")
-        .WithOpenApi();
+        .WithOpenApi()
+        .Produces<List<CourseDto>>(StatusCodes.Status100Continue);
 
         group.MapGet("/{id}", async Task<Results<Ok<Course>, NotFound>> (int id, StudentEnorllmentDbContext db) =>
         {
@@ -29,7 +42,7 @@ public static class CourseEndpoints
         .WithName("GetCourseById")
         .WithOpenApi();
 
-        group.MapPut("/{id}", async Task<Results<NotFound, NoContent>> (int id, Course course, StudentEnorllmentDbContext db) =>
+        group.MapPut("/{id}", async Task<Results<NotFound, NoContent>> (int id, CourseDto course, StudentEnorllmentDbContext db) =>
         {
             var foundModel = await db.Courses.FindAsync(id);
 
@@ -46,8 +59,13 @@ public static class CourseEndpoints
         .WithName("UpdateCourse")
         .WithOpenApi();
 
-        group.MapPost("/", async (Course course, StudentEnorllmentDbContext db) =>
+        group.MapPost("/", async (CreatueCourseDto coursedto, StudentEnorllmentDbContext db) =>
         {
+            var course = new Course()
+            {
+                Title = coursedto.Title,
+                Credits = coursedto.Credits,
+            };
             db.Courses.Add(course);
             await db.SaveChangesAsync();
             return TypedResults.Created($"/api/Course/{course.Id}", course);
