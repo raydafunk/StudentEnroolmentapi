@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.OpenApi;
 using StudentEnrollment.data;
 using StudentEnrollment.data.Models;
+using AutoMapper;
+using StudentEnroolment.API.Dtos.Student;
 
 namespace StudentEnroolment.API.EndPoints;
 
@@ -12,64 +12,72 @@ public static class StudentEndpoints
     {
         var group = routes.MapGroup("/api/Student").WithTags(nameof(Student));
 
-        group.MapGet("/", async (StudentEnorllmentDbContext db) =>
+        group.MapGet("/", async (StudentEnorllmentDbContext db, IMapper mapper) =>
         {
-            return await db.Students.ToListAsync();
+           
+            var students = await db.Students.ToListAsync();
+            return mapper.Map<List<StudentDto>>(students);
         })
         .WithName("GetAllStudents")
         .WithOpenApi()
-        .Produces<List<Student>>(StatusCodes.Status200OK);
+        .Produces<List<StudentDto>>(StatusCodes.Status200OK);
 
-        group.MapGet("/{id}", async Task<Results<Ok<Student>, NotFound>> (int id, StudentEnorllmentDbContext db) =>
+        group.MapGet("/{id}", async (int Id, StudentEnorllmentDbContext db, IMapper mapper) =>
         {
-            return await db.Students.FindAsync(id)
+            return await db.Students.FindAsync(Id)
                 is Student model
-                    ? TypedResults.Ok(model)
-                    : TypedResults.NotFound();
+                    ? Results.Ok(mapper.Map<StudentDto>(model))
+                    : Results.NotFound();
         })
         .WithName("GetStudentById")
         .WithOpenApi()
-        .Produces<Student>(StatusCodes.Status200OK)
+        .Produces<StudentDto>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound);
 
-        group.MapPut("/{id}", async Task<Results<NotFound, NoContent>> (int id, Student student, StudentEnorllmentDbContext db) =>
+        group.MapPut("/{id}", async (int id, Student student, StudentEnorllmentDbContext db, IMapper mapper) =>
         {
             var foundModel = await db.Students.FindAsync(id);
 
             if (foundModel is null)
             {
-                return TypedResults.NotFound();
+                return Results.NotFound();
             }
 
             db.Update(student);
             await db.SaveChangesAsync();
 
-            return TypedResults.NoContent();
+            return Results.NoContent();
         })
         .WithName("UpdateStudent")
-        .WithOpenApi();
+        .WithOpenApi()
+        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status204NoContent);
 
-        group.MapPost("/", async (Student student, StudentEnorllmentDbContext db) =>
+        group.MapPost("/", async (StudentDto studentDto, StudentEnorllmentDbContext db, IMapper mapper) =>
         {
+            var student = mapper.Map<Student>(studentDto);
             db.Students.Add(student);
             await db.SaveChangesAsync();
-            return TypedResults.Created($"/api/Student/{student.Id}", student);
+            return Results.Created($"/api/Student/{student.Id}", student);
         })
         .WithName("CreateStudent")
-        .WithOpenApi();
+        .WithOpenApi()
+        .Produces<StudentDto>(StatusCodes.Status201Created);
 
-        group.MapDelete("/{id}", async Task<Results<Ok<Student>, NotFound>> (int id, StudentEnorllmentDbContext db) =>
+        group.MapDelete("/{id}", async (int id, StudentEnorllmentDbContext db, IMapper mapper) =>
         {
             if (await db.Students.FindAsync(id) is Student student)
             {
                 db.Students.Remove(student);
                 await db.SaveChangesAsync();
-                return TypedResults.Ok(student);
+                return Results.Ok(student);
             }
 
-            return TypedResults.NotFound();
+            return Results.NotFound();
         })
         .WithName("DeleteStudent")
-        .WithOpenApi();
+        .WithOpenApi()
+        .Produces<StudentDto>(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status404NotFound);
     }
 }

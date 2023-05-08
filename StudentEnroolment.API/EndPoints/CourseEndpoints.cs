@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.OpenApi;
 using StudentEnrollment.data;
 using StudentEnrollment.data.Models;
-using StudentEnroolment.API.Dtos.CourseDto;
+using StudentEnroolment.API.Dtos.Course;
+using AutoMapper;
 
 namespace StudentEnroolment.API.EndPoints;
 
@@ -13,65 +13,57 @@ public static class CourseEndpoints
     {
         var group = routes.MapGroup("/api/Course").WithTags(nameof(Course));
 
-        group.MapGet("/", async (StudentEnorllmentDbContext db) =>
+        group.MapGet("/", async (StudentEnorllmentDbContext db, IMapper mapper) =>
         {
-            var data = new List<CourseDto>();
             var courses = await db.Courses.ToListAsync();
-            foreach (var course in courses)
-            {
-                data.Add(new CourseDto
-                {
-                    Title = course.Title,
-                    Credits = course.Credits,
-                    Id = course.Id,
-                });
-            }
-            return data;
+            return mapper.Map<List<CourseDto>>(courses);
         })
         .WithName("GetAllCourses")
         .WithOpenApi()
-        .Produces<List<CourseDto>>(StatusCodes.Status100Continue);
+        .Produces<List<CourseDto>>(StatusCodes.Status200OK);
 
-        group.MapGet("/{id}", async Task<Results<Ok<Course>, NotFound>> (int id, StudentEnorllmentDbContext db) =>
+        group.MapGet("/{id}", async (int Id, StudentEnorllmentDbContext db, IMapper mappper) =>
         {
-            return await db.Courses.FindAsync(id)
+            return await db.Courses.FindAsync(Id)
                 is Course model
-                    ? TypedResults.Ok(model)
-                    : TypedResults.NotFound();
+                    ? Results.Ok(mappper.Map<CourseDto>(model))
+                    : Results.NotFound();
         })
         .WithName("GetCourseById")
-        .WithOpenApi();
+        .WithOpenApi()
+        .Produces<CourseDto>(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status404NotFound);
 
-        group.MapPut("/{id}", async Task<Results<NotFound, NoContent>> (int id, CourseDto course, StudentEnorllmentDbContext db) =>
+        group.MapPut("/{id}", async (int id, CourseDto courseDto, StudentEnorllmentDbContext db, IMapper mapper) =>
         {
             var foundModel = await db.Courses.FindAsync(id);
 
             if (foundModel is null)
             {
-                return TypedResults.NotFound();
+                return Results.NotFound();
             }
-
-            db.Update(course);
+            // udpate the model 
+            mapper.Map(courseDto, foundModel);
             await db.SaveChangesAsync();
 
-            return TypedResults.NoContent();
+            return Results.NoContent();
         })
         .WithName("UpdateCourse")
-        .WithOpenApi();
+        .WithOpenApi()
+        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status204NoContent);
 
-        group.MapPost("/", async (CreatueCourseDto coursedto, StudentEnorllmentDbContext db) =>
+        group.MapPost("/", async (CreatueCourseDto coursedto, StudentEnorllmentDbContext db, IMapper mapper) =>
         {
-            var course = new Course()
-            {
-                Title = coursedto.Title,
-                Credits = coursedto.Credits,
-            };
+            var course = mapper.Map<Course>(coursedto);
             db.Courses.Add(course);
             await db.SaveChangesAsync();
-            return TypedResults.Created($"/api/Course/{course.Id}", course);
+            return Results.Created($"/api/Course/{course.Id}", course);
         })
         .WithName("CreateCourse")
-        .WithOpenApi();
+        .WithOpenApi()
+        .Produces<Course>(StatusCodes.Status201Created);
+
 
         group.MapDelete("/{id}", async Task<Results<Ok<Course>, NotFound>> (int id, StudentEnorllmentDbContext db) =>
         {
@@ -85,6 +77,8 @@ public static class CourseEndpoints
             return TypedResults.NotFound();
         })
         .WithName("DeleteCourse")
-        .WithOpenApi();
+        .WithOpenApi()
+        .Produces<Course>(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status404NotFound);
     }
 }

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using StudentEnrollment.data;
 using StudentEnrollment.data.Models;
+using StudentEnroolment.API.Configuration;
 using StudentEnroolment.API.EndPoints;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +18,8 @@ builder.Services.AddDbContext<StudentEnorllmentDbContext>(optionsAction: options
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddAutoMapper(typeof(AutoMapperConfiguration));
+
 builder.Services.AddCors(options =>
 {
    options.AddPolicy("AllowAll", policy => policy.AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod());
@@ -32,6 +35,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
 app.UseCors("AllowAll");
 
 app.MapStudentEndpoints();
