@@ -20,11 +20,12 @@ namespace StudentEnrollment.data.Reposistories
             return entity;
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(int id)
         {
             var entity = await GetAsync(id);
             _db.Set<TEntity>().Remove(entity);
-            await _db.SaveChangesAsync();
+           return await _db.SaveChangesAsync() > 0;
+            
         }
 
         public async Task<bool> ExitsAync(int id)

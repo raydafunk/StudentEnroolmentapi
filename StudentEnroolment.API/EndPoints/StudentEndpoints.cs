@@ -1,10 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
-using StudentEnrollment.data;
-using StudentEnrollment.data.Models;
+﻿using StudentEnrollment.data.Models;
 using AutoMapper;
 using StudentEnroolment.API.Dtos.Student;
-using StudentEnrollment.data.Reposistories.StudentRepo;
-using StudentEnroolment.API.Dtos.Enrollment;
+using StudentEnrollment.data.Contracts.Interfaces.StudentEnrollment;
 
 namespace StudentEnroolment.API.EndPoints;
 
@@ -14,7 +11,7 @@ public static class StudentEndpoints
     {
         var group = routes.MapGroup("/api/Student").WithTags(nameof(Student));
 
-        group.MapGet("/", async (StudentRepository repo, IMapper mapper) =>
+        group.MapGet("/", async (IStudentRepository repo, IMapper mapper) =>
         {
            
             var students = await repo.GetAllAsync();
@@ -24,7 +21,7 @@ public static class StudentEndpoints
         .WithOpenApi()
         .Produces<List<StudentDto>>(StatusCodes.Status200OK);
 
-        group.MapGet("/{id}", async (int Id, StudentRepository repo, IMapper mapper) =>
+        group.MapGet("/{id}", async (int Id, IStudentRepository repo, IMapper mapper) =>
         {
             return await repo.GetAsync(Id)
                 is Student model
@@ -36,7 +33,7 @@ public static class StudentEndpoints
         .Produces<StudentDto>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound);
 
-        group.MapPut("/{id}", async (int Id, StudentDto studentDto, StudentRepository repo, IMapper mapper) =>
+        group.MapPut("/{id}", async (int Id, StudentDto studentDto, IStudentRepository repo, IMapper mapper) =>
         {
             var foundModel = await repo.GetAsync(Id);
 
@@ -53,7 +50,7 @@ public static class StudentEndpoints
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status204NoContent);
 
-        group.MapPost("/", async (CreateStudentDto studentDto, StudentRepository repo, IMapper mapper) =>
+        group.MapPost("/", async (CreateStudentDto studentDto, IStudentRepository repo, IMapper mapper) =>
         {
             var student = mapper.Map<Student>(studentDto);
             await repo.AddAsync(student);
@@ -63,10 +60,9 @@ public static class StudentEndpoints
         .WithOpenApi()
         .Produces<StudentDto>(StatusCodes.Status201Created);
 
-        group.MapDelete("/{id}", async (int Id, StudentRepository repo, IMapper mapper) =>
+        group.MapDelete("/{id}", async (int Id, IStudentRepository repo, IMapper mapper) =>
         {
-            await repo.DeleteAsync(Id);
-            return Results.NotFound();
+            return await repo.DeleteAsync(Id) ? Results.NoContent() : Results.NoContent();
         })
         .WithName("DeleteStudent")
         .WithOpenApi()

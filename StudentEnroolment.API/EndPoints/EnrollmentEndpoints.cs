@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using StudentEnrollment.data.Models;
+﻿using StudentEnrollment.data.Models;
 using AutoMapper;
 using StudentEnroolment.API.Dtos.Enrollment;
 using StudentEnrollment.data.Contracts.Interfaces.CouresInterface;
@@ -64,8 +63,7 @@ public static class EnrollmentEndpoints
 
         group.MapDelete("/{id}", async (int Id, IEnrollmentRepository repo, IMapper mapper) =>
         {
-            await repo.DeleteAsync(Id);
-            return Results.NoContent();
+            return await repo.DeleteAsync(Id) ? Results.NoContent() : Results.NoContent();
         })
         .WithName("DeleteEnrollment")
         .WithOpenApi()
