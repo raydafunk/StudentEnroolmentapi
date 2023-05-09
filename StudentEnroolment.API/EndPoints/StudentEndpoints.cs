@@ -3,6 +3,8 @@ using StudentEnrollment.data;
 using StudentEnrollment.data.Models;
 using AutoMapper;
 using StudentEnroolment.API.Dtos.Student;
+using StudentEnrollment.data.Reposistories.StudentRepo;
+using StudentEnroolment.API.Dtos.Enrollment;
 
 namespace StudentEnroolment.API.EndPoints;
 
@@ -12,19 +14,19 @@ public static class StudentEndpoints
     {
         var group = routes.MapGroup("/api/Student").WithTags(nameof(Student));
 
-        group.MapGet("/", async (StudentEnorllmentDbContext db, IMapper mapper) =>
+        group.MapGet("/", async (StudentRepository repo, IMapper mapper) =>
         {
            
-            var students = await db.Students.ToListAsync();
+            var students = await repo.GetAllAsync();
             return mapper.Map<List<StudentDto>>(students);
         })
         .WithName("GetAllStudents")
         .WithOpenApi()
         .Produces<List<StudentDto>>(StatusCodes.Status200OK);
 
-        group.MapGet("/{id}", async (int Id, StudentEnorllmentDbContext db, IMapper mapper) =>
+        group.MapGet("/{id}", async (int Id, StudentRepository repo, IMapper mapper) =>
         {
-            return await db.Students.FindAsync(Id)
+            return await repo.GetAsync(Id)
                 is Student model
                     ? Results.Ok(mapper.Map<StudentDto>(model))
                     : Results.NotFound();
@@ -34,18 +36,16 @@ public static class StudentEndpoints
         .Produces<StudentDto>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound);
 
-        group.MapPut("/{id}", async (int id, Student student, StudentEnorllmentDbContext db, IMapper mapper) =>
+        group.MapPut("/{id}", async (int Id, StudentDto studentDto, StudentRepository repo, IMapper mapper) =>
         {
-            var foundModel = await db.Students.FindAsync(id);
+            var foundModel = await repo.GetAsync(Id);
 
             if (foundModel is null)
             {
                 return Results.NotFound();
             }
-
-            db.Update(student);
-            await db.SaveChangesAsync();
-
+            mapper.Map(studentDto, foundModel);
+            await repo.UpdateAsync(foundModel);
             return Results.NoContent();
         })
         .WithName("UpdateStudent")
@@ -53,26 +53,19 @@ public static class StudentEndpoints
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status204NoContent);
 
-        group.MapPost("/", async (StudentDto studentDto, StudentEnorllmentDbContext db, IMapper mapper) =>
+        group.MapPost("/", async (CreateStudentDto studentDto, StudentRepository repo, IMapper mapper) =>
         {
             var student = mapper.Map<Student>(studentDto);
-            db.Students.Add(student);
-            await db.SaveChangesAsync();
+            await repo.AddAsync(student);
             return Results.Created($"/api/Student/{student.Id}", student);
         })
         .WithName("CreateStudent")
         .WithOpenApi()
         .Produces<StudentDto>(StatusCodes.Status201Created);
 
-        group.MapDelete("/{id}", async (int id, StudentEnorllmentDbContext db, IMapper mapper) =>
+        group.MapDelete("/{id}", async (int Id, StudentRepository repo, IMapper mapper) =>
         {
-            if (await db.Students.FindAsync(id) is Student student)
-            {
-                db.Students.Remove(student);
-                await db.SaveChangesAsync();
-                return Results.Ok(student);
-            }
-
+            await repo.DeleteAsync(Id);
             return Results.NotFound();
         })
         .WithName("DeleteStudent")

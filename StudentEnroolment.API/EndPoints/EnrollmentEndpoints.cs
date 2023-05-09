@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using StudentEnrollment.data;
 using StudentEnrollment.data.Models;
 using AutoMapper;
 using StudentEnroolment.API.Dtos.Enrollment;
+using StudentEnrollment.data.Contracts.Interfaces.CouresInterface;
 
 namespace StudentEnroolment.API.EndPoints;
 
@@ -12,18 +12,18 @@ public static class EnrollmentEndpoints
     {
         var group = routes.MapGroup("/api/Enrollment").WithTags(nameof(Enrollment));
 
-        group.MapGet("/", async (StudentEnorllmentDbContext db, IMapper mapper) =>
+        group.MapGet("/", async (IEnrollmentRepository repo, IMapper mapper) =>
         {
-            var enrollments = await db.Enrollments.ToListAsync();
+            var enrollments = await repo.GetAllAsync();
             return mapper.Map<List<EnrollmentDto>>(enrollments);
         })
         .WithName("GetAllEnrollments")
         .WithOpenApi()
         .Produces<List<EnrollmentDto>>(StatusCodes.Status100Continue);
 
-        group.MapGet("/{id}", async (int Id, StudentEnorllmentDbContext db, IMapper mapper) =>
+        group.MapGet("/{id}", async (int Id, IEnrollmentRepository repo, IMapper mapper) =>
         {
-            return await db.Enrollments.FindAsync(Id)
+            return await repo.GetAsync(Id)
                 is Enrollment model
                     ? Results.Ok(mapper.Map<EnrollmentDto>(model))
                     : Results.NotFound();
@@ -33,9 +33,9 @@ public static class EnrollmentEndpoints
         .Produces<EnrollmentDto>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound);
 
-        group.MapPut("/{id}", async (int id, EnrollmentDto enrollmentDto, StudentEnorllmentDbContext db, IMapper mapper) =>
+        group.MapPut("/{id}", async (int Id, EnrollmentDto enrollmentDto, IEnrollmentRepository repo, IMapper mapper) =>
         {
-            var foundModel = await db.Enrollments.FindAsync(id);
+            var foundModel = await repo.GetAsync(Id);
 
             if (foundModel is null)
             {
@@ -43,7 +43,7 @@ public static class EnrollmentEndpoints
             }
             // update the model 
             mapper.Map(enrollmentDto, foundModel);
-            await db.SaveChangesAsync();
+            await repo.UpdateAsync(foundModel);
 
             return Results.NoContent();
         })
@@ -52,27 +52,20 @@ public static class EnrollmentEndpoints
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status204NoContent);
 
-        group.MapPost("/", async (CreateEnrollmenDto enrollmentDto, StudentEnorllmentDbContext db, IMapper mapper) =>
+        group.MapPost("/", async (CreateEnrollmenDto enrollmentDto, IEnrollmentRepository repo, IMapper mapper) =>
         {
             var enrollment = mapper.Map<Enrollment>(enrollmentDto);
-            db.Enrollments.Add(enrollment);
-            await db.SaveChangesAsync();
+            await repo.AddAsync(enrollment);
             return Results.Created($"/api/Enrollment/{enrollment.Id}", enrollment);
         })
         .WithName("CreateEnrollment")
         .WithOpenApi()
         .Produces<CreateEnrollmenDto>(StatusCodes.Status201Created);
 
-        group.MapDelete("/{id}", async (int id, StudentEnorllmentDbContext db, IMapper mapper) =>
+        group.MapDelete("/{id}", async (int Id, IEnrollmentRepository repo, IMapper mapper) =>
         {
-            if (await db.Enrollments.FindAsync(id) is Enrollment enrollment)
-            {
-                db.Enrollments.Remove(enrollment);
-                await db.SaveChangesAsync();
-                return Results.Ok(enrollment);
-            }
-
-            return TypedResults.NotFound();
+            await repo.DeleteAsync(Id);
+            return Results.NoContent();
         })
         .WithName("DeleteEnrollment")
         .WithOpenApi()

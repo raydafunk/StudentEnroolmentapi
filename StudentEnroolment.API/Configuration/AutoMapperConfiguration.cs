@@ -11,7 +11,7 @@ namespace StudentEnroolment.API.Configuration
         public AutoMapperConfiguration()
         {
             CreateMap<Course, CourseDto>().ReverseMap();
-            CreateMap<Course, CreatueCourseDto>().ReverseMap();
+            CreateMap<Course, CreateCourseDto>().ReverseMap();
 
             CreateMap<Student, StudentDto>().ReverseMap();
             CreateMap<Student, CreateStudentDto>().ReverseMap();
