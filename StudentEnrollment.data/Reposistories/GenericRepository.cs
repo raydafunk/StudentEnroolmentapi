@@ -6,7 +6,7 @@ namespace StudentEnrollment.data.Reposistories
 {
     public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : BaseEnitiy
     {
-        private readonly StudentEnorllmentDbContext _db;
+        protected readonly StudentEnorllmentDbContext _db;
 
         public GenericRepository(StudentEnorllmentDbContext db)
         {

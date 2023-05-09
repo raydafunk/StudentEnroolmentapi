@@ -1,15 +1,21 @@
 using Microsoft.EntityFrameworkCore;
 using StudentEnrollment.data;
+using StudentEnrollment.data.Contracts.Interfaces.CouresInterface;
+using StudentEnrollment.data.Contracts.Interfaces.StudentEnrollment;
 using StudentEnrollment.data.Models;
+using StudentEnrollment.data.Reposistories.CourseRepo;
+using StudentEnrollment.data.Reposistories.EnrollmentRepo;
+using StudentEnrollment.data.Reposistories.StudentRepo;
 using StudentEnroolment.API.Configuration;
 using StudentEnroolment.API.EndPoints;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var conn = builder.Configuration.GetConnectionString("SchoolDbConnection");
 
 builder.Services.AddDbContext<StudentEnorllmentDbContext>(optionsAction: options =>
-{
+{   
     options.UseSqlServer(conn);
 });
 
@@ -17,6 +23,11 @@ builder.Services.AddDbContext<StudentEnorllmentDbContext>(optionsAction: options
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+
+builder.Services.AddScoped<IEnrollmentRepository, EnrollementRespistory>();
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 
 builder.Services.AddAutoMapper(typeof(AutoMapperConfiguration));
 
