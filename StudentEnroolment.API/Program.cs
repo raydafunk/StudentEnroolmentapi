@@ -1,12 +1,21 @@
 using Microsoft.EntityFrameworkCore;
 using StudentEnrollment.data;
+using StudentEnrollment.data.Contracts.Interfaces.CouresInterface;
+using StudentEnrollment.data.Contracts.Interfaces.StudentEnrollment;
+using StudentEnrollment.data.Models;
+using StudentEnrollment.data.Reposistories.CourseRepo;
+using StudentEnrollment.data.Reposistories.EnrollmentRepo;
+using StudentEnrollment.data.Reposistories.StudentRepo;
+using StudentEnroolment.API.Configuration;
+using StudentEnroolment.API.EndPoints;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var conn = builder.Configuration.GetConnectionString("SchoolDbConnection");
 
 builder.Services.AddDbContext<StudentEnorllmentDbContext>(optionsAction: options =>
-{
+{   
     options.UseSqlServer(conn);
 });
 
@@ -15,9 +24,16 @@ builder.Services.AddDbContext<StudentEnorllmentDbContext>(optionsAction: options
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
+builder.Services.AddScoped<IEnrollmentRepository, EnrollementRespistory>();
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+
+builder.Services.AddAutoMapper(typeof(AutoMapperConfiguration));
+
 builder.Services.AddCors(options =>
 {
-options.AddPolicy("AllowAll", policy => policy.AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod());
+   options.AddPolicy("AllowAll", policy => policy.AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod());
 });
 
 var app = builder.Build();
@@ -30,31 +46,13 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
 app.UseCors("AllowAll");
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+app.MapStudentEndpoints();
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
+app.MapEnrollmentEndpoints();
+
+app.MapCourseEndpoints();
 
 app.Run();
-
-internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
