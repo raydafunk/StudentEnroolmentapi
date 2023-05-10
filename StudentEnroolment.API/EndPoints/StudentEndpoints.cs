@@ -33,6 +33,18 @@ public static class StudentEndpoints
         .Produces<StudentDto>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound);
 
+        group.MapGet("/GetDetails/{id}", async (int Id, IStudentRepository repo, IMapper mapper) =>
+        {
+                return await repo.GetStudentDetails(Id)
+                is Student model
+                    ? Results.Ok(mapper.Map<StudentDetailsDto>(model))
+                    : Results.NotFound();
+        })
+       .WithName("GetStudentDetailsById")
+       .WithOpenApi()
+       .Produces<StudentDetailsDto>(StatusCodes.Status200OK)
+       .Produces(StatusCodes.Status404NotFound) ;
+
         group.MapPut("/{id}", async (int Id, StudentDto studentDto, IStudentRepository repo, IMapper mapper) =>
         {
             var foundModel = await repo.GetAsync(Id);
