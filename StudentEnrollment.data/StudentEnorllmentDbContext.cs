@@ -8,7 +8,7 @@ using StudentEnrollment.data.Models;
 
 namespace StudentEnrollment.data
 {
-    public class StudentEnorllmentDbContext : IdentityDbContext
+    public class StudentEnorllmentDbContext : IdentityDbContext<SchoolUser>
     {
         public StudentEnorllmentDbContext(DbContextOptions<StudentEnorllmentDbContext> options) :base(options)
         {
