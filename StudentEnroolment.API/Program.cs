@@ -1,14 +1,13 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using StudentEnrollment.data;
 using StudentEnrollment.data.Contracts.Interfaces.CouresInterface;
 using StudentEnrollment.data.Contracts.Interfaces.StudentEnrollment;
-using StudentEnrollment.data.Models;
 using StudentEnrollment.data.Reposistories.CourseRepo;
 using StudentEnrollment.data.Reposistories.EnrollmentRepo;
 using StudentEnrollment.data.Reposistories.StudentRepo;
 using StudentEnroolment.API.Configuration;
 using StudentEnroolment.API.EndPoints;
-using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +17,10 @@ builder.Services.AddDbContext<StudentEnorllmentDbContext>(optionsAction: options
 {   
     options.UseSqlServer(conn);
 });
+
+builder.Services.AddIdentityCore<SchoolUser>()
+        .AddRoles<IdentityRole>()
+        .AddEntityFrameworkStores<StudentEnorllmentDbContext>();
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

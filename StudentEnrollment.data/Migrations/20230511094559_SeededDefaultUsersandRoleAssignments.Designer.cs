@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using StudentEnrollment.data;
 
@@ -11,9 +12,11 @@ using StudentEnrollment.data;
 namespace StudentEnrollment.data.Migrations
 {
     [DbContext(typeof(StudentEnorllmentDbContext))]
-    partial class StudentEnorllmentDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230511094559_SeededDefaultUsersandRoleAssignments")]
+    partial class SeededDefaultUsersandRoleAssignments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -385,7 +388,7 @@ namespace StudentEnrollment.data.Migrations
                         {
                             Id = "1a5eebf5-f9a2-4261-8b66-3d89414ed7ec",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "41df4bd8-199a-420a-a2d7-8ab2ee64e557",
+                            ConcurrencyStamp = "c750757c-0957-4ff3-8099-7cb00434b5be",
                             Email = "r.brownamory@sky.com",
                             EmailConfirmed = true,
                             FristName = "Ray Carl",
@@ -393,9 +396,9 @@ namespace StudentEnrollment.data.Migrations
                             LockoutEnabled = false,
                             NormalizedEmail = "R.BROWNAMORY@SKY.COM",
                             NormalizedUserName = "R.BROWNAMORY@SKY.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEOdi1qu5iHu57+mF6jkusnyUuVhLsPF7tvO5KlAvgbWmiiUZrdna1n0i10LL+SvnRw==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEO1ALoMBEiH969EBCvVljZ4njDYhskRDNsITX8WiftFtwpVCPFpisXoSYNIvHgSuKA==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "59efe94b-a605-4bc0-bc28-8e53e41bade2",
+                            SecurityStamp = "04ceac21-cee0-48ab-8831-702e22f56b30",
                             TwoFactorEnabled = false,
                             UserName = "r.brownamory@sky.com"
                         },
@@ -403,7 +406,7 @@ namespace StudentEnrollment.data.Migrations
                         {
                             Id = "7dc2c507-1718-4ca2-8b99-507ad5f821b8",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "93958346-8b7f-41b6-817c-acf22e9167b7",
+                            ConcurrencyStamp = "47ae1cab-cadc-44b7-b6d5-5094f8e479a6",
                             Email = "n.brownamory@sky.com",
                             EmailConfirmed = true,
                             FristName = "Nelson",
@@ -411,11 +414,11 @@ namespace StudentEnrollment.data.Migrations
                             LockoutEnabled = false,
                             NormalizedEmail = "R.BROWNAMORY@SKY.COM",
                             NormalizedUserName = "N.BROWNAMORY@SKY.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEJLaUX715Mv+5pRqKVbGJgDPCejMSYR99L3ue1OuH/MUtvRM5Bvk/kYM9MofpNNZ1Q==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEP1jbZDodLUIkIprMXaoxnE2qQtGUaV9uhEXELPjtswVj6BOEuQ19HvsFesTCvf1pg==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "07f3b8b4-0a55-49dc-af4e-c25e247e6aef",
+                            SecurityStamp = "32839676-aa02-418c-b13a-24b48fe5bc34",
                             TwoFactorEnabled = false,
-                            UserName = "n.brownamory@sky.com"
+                            UserName = "r.brownamory@sky.com"
                         });
                 });
 
