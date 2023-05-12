@@ -2,6 +2,8 @@
 using AutoMapper;
 using StudentEnroolment.API.Dtos.Student;
 using StudentEnrollment.data.Contracts.Interfaces.StudentEnrollment;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
 
 namespace StudentEnroolment.API.EndPoints;
 
@@ -17,6 +19,7 @@ public static class StudentEndpoints
             var students = await repo.GetAllAsync();
             return mapper.Map<List<StudentDto>>(students);
         })
+
         .WithName("GetAllStudents")
         .WithOpenApi()
         .Produces<List<StudentDto>>(StatusCodes.Status200OK);
@@ -72,7 +75,7 @@ public static class StudentEndpoints
         .WithOpenApi()
         .Produces<StudentDto>(StatusCodes.Status201Created);
 
-        group.MapDelete("/{id}", async (int Id, IStudentRepository repo, IMapper mapper) =>
+        group.MapDelete("/{id}", [Authorize(Roles = "Administrator")] async (int Id, IStudentRepository repo, IMapper mapper) =>
         {
             return await repo.DeleteAsync(Id) ? Results.NoContent() : Results.NoContent();
         })

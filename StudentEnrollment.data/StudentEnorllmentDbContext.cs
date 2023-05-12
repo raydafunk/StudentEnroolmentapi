@@ -8,7 +8,7 @@ using StudentEnrollment.data.Models;
 
 namespace StudentEnrollment.data
 {
-    public class StudentEnorllmentDbContext : IdentityDbContext
+    public class StudentEnorllmentDbContext : IdentityDbContext<SchoolUser>
     {
         public StudentEnorllmentDbContext(DbContextOptions<StudentEnorllmentDbContext> options) :base(options)
         {
@@ -18,7 +18,9 @@ namespace StudentEnrollment.data
         {
             base.OnModelCreating(builder);
             builder.ApplyConfiguration(new CourseConfiguration());
-            builder.ApplyConfiguration(new UserRoleCourseConfiguration());
+            builder.ApplyConfiguration(new RoleConfiguration());
+            builder.ApplyConfiguration(new SchoolUserConfiguration());
+            builder.ApplyConfiguration(new UserRoleConfiguration());  
         }
         public DbSet<Course> Courses { get; set; } 
         public DbSet<Student> Students { get; set; } 

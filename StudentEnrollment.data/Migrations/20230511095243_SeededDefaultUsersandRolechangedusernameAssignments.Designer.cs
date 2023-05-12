@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using StudentEnrollment.data;
 
@@ -11,9 +12,11 @@ using StudentEnrollment.data;
 namespace StudentEnrollment.data.Migrations
 {
     [DbContext(typeof(StudentEnorllmentDbContext))]
-    partial class StudentEnorllmentDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230511095243_SeededDefaultUsersandRolechangedusernameAssignments")]
+    partial class SeededDefaultUsersandRolechangedusernameAssignments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -385,37 +388,37 @@ namespace StudentEnrollment.data.Migrations
                         {
                             Id = "1a5eebf5-f9a2-4261-8b66-3d89414ed7ec",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "5f2ca77f-d1cd-4c28-8127-f91be0d58df8",
-                            Email = "rbrownamory@sky.com",
+                            ConcurrencyStamp = "41df4bd8-199a-420a-a2d7-8ab2ee64e557",
+                            Email = "r.brownamory@sky.com",
                             EmailConfirmed = true,
                             FristName = "Ray Carl",
                             LastName = "Brown-Amory",
                             LockoutEnabled = false,
-                            NormalizedEmail = "RBROWNAMORY@SKY.COM",
-                            NormalizedUserName = "RBROWNAMORY@SKY.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEJ1FNVYoJmDmHRJQVgxTxvuYM9X4A6L+LYGxVnpruoREyGb1VGswixGyA2f5kphU9A==",
+                            NormalizedEmail = "R.BROWNAMORY@SKY.COM",
+                            NormalizedUserName = "R.BROWNAMORY@SKY.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEOdi1qu5iHu57+mF6jkusnyUuVhLsPF7tvO5KlAvgbWmiiUZrdna1n0i10LL+SvnRw==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "72dda60f-14f7-49d8-aa38-a6552d4fd20f",
+                            SecurityStamp = "59efe94b-a605-4bc0-bc28-8e53e41bade2",
                             TwoFactorEnabled = false,
-                            UserName = "rbrownamory@sky.com"
+                            UserName = "r.brownamory@sky.com"
                         },
                         new
                         {
                             Id = "7dc2c507-1718-4ca2-8b99-507ad5f821b8",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "94cd4f7e-01df-4ada-98e0-cccdfcef4398",
-                            Email = "nbrownamory@sky.com",
+                            ConcurrencyStamp = "93958346-8b7f-41b6-817c-acf22e9167b7",
+                            Email = "n.brownamory@sky.com",
                             EmailConfirmed = true,
                             FristName = "Nelson",
                             LastName = "Brown-Amory",
                             LockoutEnabled = false,
-                            NormalizedEmail = "NBROWNAMORY@SKY.COM",
-                            NormalizedUserName = "NBROWNAMORY@SKY.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAENScwNd2Vx3T1Jljs8sZWD2zX07JSEg2IPiH2zBHK93nXriHQ+NVeRcA7jHmX9U7aA==",
+                            NormalizedEmail = "R.BROWNAMORY@SKY.COM",
+                            NormalizedUserName = "N.BROWNAMORY@SKY.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEJLaUX715Mv+5pRqKVbGJgDPCejMSYR99L3ue1OuH/MUtvRM5Bvk/kYM9MofpNNZ1Q==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "ed46aec7-f4c5-4138-9b03-2d34a0d92a12",
+                            SecurityStamp = "07f3b8b4-0a55-49dc-af4e-c25e247e6aef",
                             TwoFactorEnabled = false,
-                            UserName = "nbrownamory@sky.com"
+                            UserName = "n.brownamory@sky.com"
                         });
                 });
 
