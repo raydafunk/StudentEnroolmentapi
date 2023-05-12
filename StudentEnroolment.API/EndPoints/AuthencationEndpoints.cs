@@ -17,7 +17,8 @@ public static class AuthencationEndpoints
             }
             return Results.Ok();
         })
-         .WithTags("Authentication")
+        .AllowAnonymous()
+        .WithTags("Authentication")
         .WithName("login")
         .WithOpenApi()  
         .Produces(StatusCodes.Status201Created)
@@ -41,7 +42,9 @@ public static class AuthencationEndpoints
             }
             return Results.BadRequest(errors);
         })
-        .WithTags("Authentication")
+
+       .AllowAnonymous()
+       .WithTags("Authentication")
        .WithName("Register")
        .WithOpenApi()
        .Produces(StatusCodes.Status201Created)
