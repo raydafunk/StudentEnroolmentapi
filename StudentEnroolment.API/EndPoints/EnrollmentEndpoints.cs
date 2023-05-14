@@ -2,6 +2,8 @@
 using AutoMapper;
 using StudentEnroolment.API.Dtos.Enrollment;
 using StudentEnrollment.data.Contracts.Interfaces.CouresInterface;
+using FluentValidation;
+using StudentEnroolment.API.Dtos.Course;
 
 namespace StudentEnroolment.API.EndPoints;
 
@@ -51,15 +53,22 @@ public static class EnrollmentEndpoints
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status204NoContent);
 
-        group.MapPost("/", async (CreateEnrollmenDto enrollmentDto, IEnrollmentRepository repo, IMapper mapper) =>
+        group.MapPost("/", async (CreateEnrollmentDto enrollmentDto, IEnrollmentRepository repo, IMapper mapper, IValidator<CreateEnrollmentDto> validator) =>
         {
+            var validationResult = await validator.ValidateAsync(enrollmentDto);
+
+            if (!validationResult.IsValid)
+            {
+                return Results.BadRequest(validationResult.ToDictionary());
+            }
+
             var enrollment = mapper.Map<Enrollment>(enrollmentDto);
             await repo.AddAsync(enrollment);
             return Results.Created($"/api/Enrollment/{enrollment.Id}", enrollment);
         })
         .WithName("CreateEnrollment")
         .WithOpenApi()
-        .Produces<CreateEnrollmenDto>(StatusCodes.Status201Created);
+        .Produces<CreateEnrollmentDto>(StatusCodes.Status201Created);
 
         group.MapDelete("/{id}", async (int Id, IEnrollmentRepository repo, IMapper mapper) =>
         {
