@@ -3,7 +3,10 @@ using AutoMapper;
 using StudentEnroolment.API.Dtos.Student;
 using StudentEnrollment.data.Contracts.Interfaces.StudentEnrollment;
 using Microsoft.AspNetCore.Authorization;
-using System.Data;
+using FluentValidation;
+using StudentEnroolment.API.Services;
+using System.ComponentModel.DataAnnotations;
+using StudentEnroolment.API.Filters;
 
 namespace StudentEnroolment.API.EndPoints;
 
@@ -15,7 +18,7 @@ public static class StudentEndpoints
 
         group.MapGet("/", async (IStudentRepository repo, IMapper mapper) =>
         {
-           
+
             var students = await repo.GetAllAsync();
             return mapper.Map<List<StudentDto>>(students);
         })
@@ -38,39 +41,65 @@ public static class StudentEndpoints
 
         group.MapGet("/GetDetails/{id}", async (int Id, IStudentRepository repo, IMapper mapper) =>
         {
-                return await repo.GetStudentDetails(Id)
-                is Student model
-                    ? Results.Ok(mapper.Map<StudentDetailsDto>(model))
-                    : Results.NotFound();
+            return await repo.GetStudentDetails(Id)
+            is Student model
+                ? Results.Ok(mapper.Map<StudentDetailsDto>(model))
+                : Results.NotFound();
         })
        .WithName("GetStudentDetailsById")
        .WithOpenApi()
        .Produces<StudentDetailsDto>(StatusCodes.Status200OK)
-       .Produces(StatusCodes.Status404NotFound) ;
+       .Produces(StatusCodes.Status404NotFound);
 
-        group.MapPut("/{id}", async (int Id, StudentDto studentDto, IStudentRepository repo, IMapper mapper) =>
-        {
-            var foundModel = await repo.GetAsync(Id);
+        group.MapPut("/{id}", async (int Id, StudentDto studentDto, IStudentRepository repo, IMapper mapper,
+            IValidator<StudentDto> validator, IFileUpload fileUpload) =>
+           {
+               var validationResult = await validator.ValidateAsync(studentDto);
 
-            if (foundModel is null)
-            {
-                return Results.NotFound();
-            }
-            mapper.Map(studentDto, foundModel);
-            await repo.UpdateAsync(foundModel);
-            return Results.NoContent();
-        })
+               if (!validationResult.IsValid)
+               {
+                   return Results.BadRequest(validationResult.ToDictionary());
+               }
+
+               var foundModel = await repo.GetAsync(Id);
+
+               if (foundModel is null)
+               {
+                   return Results.NotFound();
+               }
+
+               mapper.Map(studentDto, foundModel);
+
+               if (studentDto.ProfilePicture != null)
+               {
+                   foundModel.Picture = fileUpload.UploadStudentFile(studentDto.ProfilePicture, studentDto.OrignalFilename);
+               }
+               await repo.UpdateAsync(foundModel);
+               return Results.NoContent();
+           })
         .WithName("UpdateStudent")
         .WithOpenApi()
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status204NoContent);
 
-        group.MapPost("/", async (CreateStudentDto studentDto, IStudentRepository repo, IMapper mapper) =>
+        group.MapPost("/", [Authorize(Roles = "Adminstrator")] async (CreateStudentDto studentDto, IStudentRepository repo, IMapper mapper,
+            IValidator<CreateStudentDto> validator, IFileUpload fileUpload) =>
         {
+            var validationResult = await validator.ValidateAsync(studentDto);
+
+            if (!validationResult.IsValid)
+            {
+                return Results.BadRequest(validationResult.ToDictionary());
+            }
+
             var student = mapper.Map<Student>(studentDto);
+            student.Picture = fileUpload.UploadStudentFile(studentDto.ProfilePicture, studentDto.OrignalFilename);
             await repo.AddAsync(student);
+
             return Results.Created($"/api/Student/{student.Id}", student);
         })
+        .AddEndpointFilter<ValidationFilter<CreateStudentDto>>()
+        .AddEndpointFilter<LoggingFilters>()
         .WithName("CreateStudent")
         .WithOpenApi()
         .Produces<StudentDto>(StatusCodes.Status201Created);

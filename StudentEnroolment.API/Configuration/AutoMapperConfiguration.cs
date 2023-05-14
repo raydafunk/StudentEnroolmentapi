@@ -25,7 +25,7 @@ namespace StudentEnroolment.API.Configuration
 
             //enrollment mappings
             CreateMap<Enrollment, Enrollment>().ReverseMap();
-            CreateMap<Enrollment, CreateEnrollmenDto>().ReverseMap();
+            CreateMap<Enrollment, CreateEnrollmentDto>().ReverseMap();
         }
     }
 }

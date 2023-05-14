@@ -1,5 +1,7 @@
-﻿using StudentEnroolment.API.Dtos.Authentication;
+﻿using FluentValidation;
+using StudentEnroolment.API.Dtos.Authentication;
 using StudentEnroolment.API.Dtos.Error;
+using StudentEnroolment.API.Filters;
 using StudentEnroolment.API.Services;
 
 namespace StudentEnroolment.API.EndPoints;
@@ -8,8 +10,9 @@ public static class AuthencationEndpoints
 {
     public static void MapAuthenacationEndpoints(this IEndpointRouteBuilder routes)
     {
-        routes.MapPost("/api/login", async (LoginDto loginDto, IAuthManager authManger) =>
+        routes.MapPost("/api/login", async(LoginDto loginDto, IAuthManager authManger, IValidator<LoginDto> validator) =>
         {
+
             var response = await authManger.Login(loginDto);
             if (response is null)
             {
@@ -17,6 +20,7 @@ public static class AuthencationEndpoints
             }
             return Results.Ok();
         })
+        .AddEndpointFilter<ValidationFilter<LoginDto>>()
         .AllowAnonymous()
         .WithTags("Authentication")
         .WithName("login")
@@ -24,7 +28,7 @@ public static class AuthencationEndpoints
         .Produces(StatusCodes.Status201Created)
         .Produces(StatusCodes.Status401Unauthorized);
 
-        routes.MapPost("/api/register", async (RegisterDto registorDto, IAuthManager authManger) =>
+        routes.MapPost("/api/register", async (RegisterDto registorDto, IAuthManager authManger, IValidator<RegisterDto> validator) =>
         {
             var response = await authManger.Register(registorDto);
             if (!response.Any())
@@ -42,7 +46,7 @@ public static class AuthencationEndpoints
             }
             return Results.BadRequest(errors);
         })
-
+       .AddEndpointFilter<ValidationFilter<RegisterDto>>()
        .AllowAnonymous()
        .WithTags("Authentication")
        .WithName("Register")
